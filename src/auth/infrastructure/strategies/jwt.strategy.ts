@@ -28,6 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!user) {
             throw new Error("User not found");
         }
-        return user;
+        const { passwordHash, ...safeUser } = user;
+        return safeUser;
     }
 }

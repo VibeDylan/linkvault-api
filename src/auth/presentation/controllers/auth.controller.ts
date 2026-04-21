@@ -3,6 +3,9 @@ import { LoginUseCase } from "src/auth/application/use-cases/login.use-case";
 import { RegisterUseCase } from "src/auth/application/use-cases/register.use-case";
 import { RegisterDto } from "../dto/register.dto";
 import type { Response } from "express";
+import { UseGuards, Get, Req } from "@nestjs/common";
+import { JwtGuard } from "src/auth/infrastructure/guards/jwt.guard";
+import type { Request } from "express";
 import { LoginDto } from "../dto/login.dto";
 
 @Controller('auth')
@@ -10,7 +13,7 @@ export class AuthController {
     constructor(
         private readonly registerUseCase: RegisterUseCase,
         private readonly loginUseCase: LoginUseCase
-    ) {}
+    ) { }
 
     @Post('register')
     async register(@Body() data: RegisterDto, @Res() res: Response) {
@@ -20,7 +23,7 @@ export class AuthController {
             httpOnly: true,
             secure: false,
             sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000, 
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         return res.json({
@@ -35,13 +38,13 @@ export class AuthController {
 
     @Post('login')
     async login(@Body() data: LoginDto, @Res() res: Response) {
-      const { user, accessToken, refreshToken } = await this.loginUseCase.execute(data);
+        const { user, accessToken, refreshToken } = await this.loginUseCase.execute(data);
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
             sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000, 
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         return res.json({
@@ -52,5 +55,11 @@ export class AuthController {
                 username: user.username,
             }
         });
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('me')
+    me(@Req() req: Request) {
+        return req.user;
     }
 }
