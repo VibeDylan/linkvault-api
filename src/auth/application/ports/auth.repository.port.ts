@@ -16,3 +16,5 @@ export interface IAuthRepository {
     findRefreshToken(token: string): Promise<{userId: string, expiresAt: Date} | null>;
     deleteRefreshToken(token: string): Promise<void>;
 }
+
+export const AUTH_REPOSITORY = Symbol('IAuthRepository');
