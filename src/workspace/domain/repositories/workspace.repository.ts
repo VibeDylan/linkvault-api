@@ -6,10 +6,10 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class WorkspaceRepository implements IWOrkspaceRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) { }
 
     async create(data: { name: string }): Promise<WorkspaceEntity> {
-        const workspace = await this.prisma.workspace.create({data});
+        const workspace = await this.prisma.workspace.create({ data });
         return new WorkspaceEntity(workspace.id, workspace.name, workspace.createdAt, workspace.updatedAt)
     }
 
@@ -37,5 +37,15 @@ export class WorkspaceRepository implements IWOrkspaceRepository {
                 role
             }
         });
+    }
+
+    async findMember(workspaceId: string, userId: string): Promise<{ role: 'ADMIN' | 'MEMBER' } | null> {
+        const member = await this.prisma.workspaceMember.findFirst({
+            where: {
+                workspaceId,
+                userId,
+            },
+        });
+        return member ? { role: member.role } : null;
     }
 }
