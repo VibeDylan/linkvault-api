@@ -6,6 +6,9 @@ import type { Response } from "express";
 import type { Request } from "express";
 import { LoginDto } from "../dto/login.dto";
 import { RefreshUseCase } from "src/auth/application/use-cases/refresh.use-case";
+import { JwtGuard } from "src/auth/infrastructure/guards/jwt.guard";
+import { LogoutUseCase } from "src/auth/application/use-cases/logout.use-case";
+import { UseGuards } from "@nestjs/common";
 
 
 @Controller('auth')
@@ -13,7 +16,9 @@ export class AuthController {
     constructor(
         private readonly registerUseCase: RegisterUseCase,
         private readonly loginUseCase: LoginUseCase,
-        private readonly refreshUseCase: RefreshUseCase
+        private readonly refreshUseCase: RefreshUseCase,
+        private readonly logoutUseCase: LogoutUseCase
+
 
     ) { }
 
@@ -67,7 +72,6 @@ export class AuthController {
 
         const { accessToken, refreshToken } = await this.refreshUseCase.execute(token);
 
-        // On set le nouveau cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
@@ -76,5 +80,24 @@ export class AuthController {
         });
 
         return res.json({ accessToken });
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('logout')
+    async logout(@Req() req: Request, @Res() res: Response) {
+        const token = req.cookies?.refreshToken;
+
+        if (token) {
+            await this.logoutUseCase.execute(token);
+        }
+
+        // On efface le cookie
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+        });
+
+        return res.json({ message: 'Logged out' });
     }
 }
