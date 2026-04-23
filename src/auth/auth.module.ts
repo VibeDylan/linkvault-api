@@ -9,6 +9,7 @@ import { AUTH_REPOSITORY } from './application/ports/auth.repository.port';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { JwtGuard } from './infrastructure/guards/jwt.guard';
 import { RefreshUseCase } from './application/use-cases/refresh.use-case';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RefreshUseCase } from './application/use-cases/refresh.use-case';
     RefreshUseCase,
     JwtStrategy,
     JwtGuard,
+    LogoutUseCase,
     {
       provide: AUTH_REPOSITORY,
       useClass: AuthRepository,
