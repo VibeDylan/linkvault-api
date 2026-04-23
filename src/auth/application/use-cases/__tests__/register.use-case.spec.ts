@@ -54,7 +54,6 @@ describe('RegisterUseCase', () => {
             email: 'test@test.com',
         });
 
-        // ACT + ASSERT
         await expect(
             useCase.execute({
                 email: 'test@test.com',
